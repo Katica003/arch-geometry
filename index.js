@@ -47,7 +47,7 @@ const makeHalfArch = (
 
   const points = []
   for (let i = 0; i <= dx + 1; i++) {
-    const x = ((span / 2) / dx) * direction * i
+    const x = lineSep * direction * i
     const Pdx = new Flatten.Point(x, arch1Function(x))
 
     Pdx.attrs = { r: 5, fill: 'green' }
@@ -67,7 +67,6 @@ const makeHalfArch = (
   }
 
   const newPoints = [points[0]]
-  const newSegments = []
   for (let i = 0; i < vectors.length - 1; i++) {
     const prevPoint = newPoints.slice(-1)[0]
     const line = new Flatten.Line(prevPoint, vectors[i].rotate90CW())
@@ -106,54 +105,7 @@ const update = () => {
   outputs.push(xAxis, yAxis)
 
   outputs.push(...makeHalfArch(-1, inputValues))
-  outputs.push(...makeHalfArch(1, inputValues))
-
-  // const textA = new Extra.Text(A, 'A')
-  // outputs.push(A, textA)
-
-  // const archFunction = x => (10 * Math.cosh(span * x/10))
-  // const f = new Extra.Formula(archFunction, -10, 10, 1)
-  // outputs.push(f)
-
-  // const arch2Function = x => (-1 * Math.cosh(.x * x) + 1 + height)
-  // const g = new Extra.Formula(arch2Function, -5, 5, 0.01)
-  // outputs.push(P)
-
-  // const P = f.intersect(xAxis)[0]
-
-  // const P = new Flatten.Point(span/2, 0)
-  // const textP = new Extra.Text(P, 'P')
-  // outputs.push(P, textP)
-
-  // const segment1 = new Flatten.Segment(A, new Flatten.Point(3, 4))
-  // const segment2 = new Flatten.Segment(new Flatten.Point(1, 1), new Flatten.Point(4, 7))
-
-  // outputs.push(segment1, segment2)
-
-  // segment1.intersect(segment2).forEach(p => {
-  //   outputs.push(p)
-  // })
-
-  // if (tmp.length > 0) {
-  //   const pointE = tmp[0]
-  //   pointE.attrs = { r: 10, fill: 'green' }
-  //   const text = new Extra.Text(pointE, 'Intersection')
-
-  //   outputs.push(pointE, text)
-  // }
-
-  // const f = new Extra.Formula(x => (10 * Math.cosh(test * x / 300)), -100, 100, 1)
-  // f.attrs = { stroke: 'red', strokeWidth: 3 }
-  // outputs.push(f)
-
-  // const tmp2 = f.intersect(segment2)
-  // if (tmp2.length > 0) {
-  //   const pointF = tmp2[0]
-  //   pointF.attrs = { r: 5, fill: 'yellow' }
-  //   const text = new Extra.Text(pointF, 'S')
-
-  //   outputs.push(pointF, text)
-  // }
+  outputs.push(...makeHalfArch(1, { ...inputValues, hForce: inputValues.hForce + 1 }))
 
   return outputs
 }
