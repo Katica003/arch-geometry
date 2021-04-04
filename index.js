@@ -56,16 +56,22 @@ const makeHalfArch = (
   }
   outputs.push(...points)
 
-  // const vectors = []
-  // let cumulativeForce = 0
-  // for (let i = 1; i < points.length; i++) {
-  //   const d = points[i].distanceTo(points[i - 1])
-  //   cumulativeForce += d * distributedForce
-  //   const v = new Flatten.Vector(hForce * direction, -cumulativeForce)
-  //
-  //   vectors.push(v)
-  // }
-  // console.log(vectors)
+  const vectors = [new Flatten.Vector(direction, 0)]
+  let cumulativeForce = 0
+  for (let i = 1; i < points.length; i++) {
+    const d = points[i].distanceTo(points[i - 1])[0]
+    cumulativeForce += d * distributedForce
+    const v = new Flatten.Vector(hForce * direction, -cumulativeForce)
+
+    vectors.push(v)
+  }
+
+  const newPoints = [points[0]]
+  for (let i = 0; i < vectors.length - 1; i++) {
+    const line = new Flatten.Line(newPoints.slice(-1)[0], vectors[i].rotate90CW())
+    newPoints.push(line.intersect(midlines[i])[0])
+  }
+  outputs.push(...newPoints)
 
   return outputs
 }

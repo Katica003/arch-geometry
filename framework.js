@@ -158,11 +158,11 @@ window['@isti/flatten-js-extra'] = {
   Formula,
 }
 
-window['@flatten-js/core'].Point = class extends window['@flatten-js/core'].Point {
-  constructor(x, y) {
-    super(x, -y)
-  }
-}
+// window['@flatten-js/core'].Point = class extends window['@flatten-js/core'].Point {
+//   constructor(x, y) {
+//     super(x, -y)
+//   }
+// }
 
 window['@flatten-js/core'].Segment.prototype.svg = function(attrs = {}) {
         let {stroke, strokeWidth, strokeDashArray, id, className} = attrs;
