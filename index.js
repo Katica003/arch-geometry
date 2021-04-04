@@ -15,20 +15,29 @@ const makeHalfArch = (
 ) => {
   const outputs = []
 
+  const lineSep = (span / 2) / dx
+
   const lines = []
   for (let i = 0; i <= dx; i++) {
-    // const vline = new Flatten.Line(
-    //   new Flatten.Point((span / 2) / dx * i * direction, 0),
-    //   new Flatten.Point((span / 2) / dx * i * direction, 1)
-    // )
     const vline = new Flatten.Line(
-      new Flatten.Point((span / 2) / dx * i * direction, 0),
-      new Flatten.Point((span / 2) / dx * i * direction, 1)
+      new Flatten.Point(lineSep * i * direction, 0),
+      new Flatten.Point(lineSep * i * direction, 1)
     )
     vline.attrs = { stroke: 'green' }
     lines.push(vline)
   }
   outputs.push(...lines)
+
+  const midlines = []
+  for (let i = 1; i <= dx; i++) {
+    const vline = new Flatten.Line(
+      new Flatten.Point(((-0.5 * lineSep) + lineSep * i) * direction, 0),
+      new Flatten.Point(((-0.5 * lineSep) + lineSep * i) * direction, 1)
+    )
+    vline.attrs = { stroke: 'green', strokeDashArray: '0.1' }
+    midlines.push(vline)
+  }
+  outputs.push(...midlines)
 
   const arch1Inverse = y => Math.acosh(-y + 1 + height)
   const arch1Inverse0 = arch1Inverse(0)

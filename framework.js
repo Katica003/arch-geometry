@@ -158,10 +158,25 @@ window['@isti/flatten-js-extra'] = {
   Formula,
 }
 
-class NewPoint extends window['@flatten-js/core'].Point {
+window['@flatten-js/core'].Point = class extends window['@flatten-js/core'].Point {
   constructor(x, y) {
     super(x, -y)
   }
 }
 
-window['@flatten-js/core'].Point = NewPoint
+window['@flatten-js/core'].Segment.prototype.svg = function(attrs = {}) {
+        let {stroke, strokeWidth, strokeDashArray, id, className} = attrs;
+        // let rest_str = Object.keys(rest).reduce( (acc, key) => acc += ` ${key}="${rest[key]}"`, "");
+        let id_str = (id && id.length > 0) ? `id="${id}"` : "";
+        let class_str = (className && className.length > 0) ? `class="${className}"` : "";
+
+        return `\n<line
+          x1="${this.start.x}"
+          y1="${this.start.y}"
+          x2="${this.end.x}"
+          y2="${this.end.y}"
+          stroke="${stroke || "black"}"
+          stroke-width="${strokeWidth || 1}"
+          stroke-dasharray="${strokeDashArray || ''}"
+          ${id_str} ${class_str} />`;
+}
