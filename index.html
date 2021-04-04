@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <title>Arch Geometry</title>
+
+  <script src="https://www.unpkg.com/@flatten-js/core@1.2.20/dist/main.umd.js"></script>
+  <script src="framework.js"></script>
+  <!-- <script src="data.js"></script> -->
+  <script src="index.js"></script>
+
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #inputs {
+      width: 100%;
+      height: 10%;
+    }
+
+    #inputs input, #inputs span {
+      width: 50%;
+      font-family: monospace;
+    }
+
+    #output {
+      width: calc(100% - 20px);
+      height: calc(90% - 20px);
+
+      /* margin: 10px; */
+
+      border: 1px solid black;
+
+      /* transform: scaleY(-1.0); */
+    }
+
+    /* #output text { */
+    /*   transform: scaleY(-1.0); */
+    /* } */
+  </style>
+</head>
+<body>
+  <div id="inputs"></div>
+  <svg id="output"></svg>
+</body>
+</html>
