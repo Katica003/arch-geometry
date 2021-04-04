@@ -29,7 +29,7 @@ const makeHalfArch = (
   outputs.push(...lines)
 
   const midlines = []
-  for (let i = 1; i <= dx; i++) {
+  for (let i = 1; i <= dx + 1; i++) {
     const vline = new Flatten.Line(
       new Flatten.Point(((-0.5 * lineSep) + lineSep * i) * direction, 0),
       new Flatten.Point(((-0.5 * lineSep) + lineSep * i) * direction, 1)
@@ -46,13 +46,13 @@ const makeHalfArch = (
   outputs.push(f)
 
   const points = []
-  for (let i = 0; i <= dx; i++) {
+  for (let i = 0; i <= dx + 1; i++) {
     const x = ((span / 2) / dx) * direction * i
     const Pdx = new Flatten.Point(x, arch1Function(x))
 
     Pdx.attrs = { r: 5, fill: 'green' }
     points.push(Pdx)
-    outputs.push(new Extra.Text(Pdx, `P<tspan dy ="0.1">${i * direction}</tspan>`))
+    // outputs.push(new Extra.Text(Pdx, `P<tspan dy ="0.1">${i * direction}</tspan>`))
   }
   outputs.push(...points)
 
@@ -67,9 +67,13 @@ const makeHalfArch = (
   }
 
   const newPoints = [points[0]]
+  const newSegments = []
   for (let i = 0; i < vectors.length - 1; i++) {
-    const line = new Flatten.Line(newPoints.slice(-1)[0], vectors[i].rotate90CW())
-    newPoints.push(line.intersect(midlines[i])[0])
+    const prevPoint = newPoints.slice(-1)[0]
+    const line = new Flatten.Line(prevPoint, vectors[i].rotate90CW())
+    const nextPoint = line.intersect(midlines[i])[0]
+    newPoints.push(nextPoint)
+    outputs.push(new Flatten.Segment(prevPoint, nextPoint))
   }
   outputs.push(...newPoints)
 
