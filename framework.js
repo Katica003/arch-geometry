@@ -110,11 +110,16 @@ class Formula {
 
     const segments = []
     let previous = getPoint(from)
-    for (let i = from + step; i <= to; i += step) {
-      const current = getPoint(i)
+    for (let i = 1; i <= (to - from) / step; i++) {
+      const current = getPoint(from + (i * step))
       segments.push(new Flatten.Segment(previous, current))
       previous = current
     }
+    // for (let i = from + step; i <= to; i += step) {
+    //   const current = getPoint(i)
+    //   segments.push(new Flatten.Segment(previous, current))
+    //   previous = current
+    // }
 
     this.multiline = new Flatten.Multiline(segments)
     // this.svg = this.multiline.svg.bind(this.multiline)

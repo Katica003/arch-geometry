@@ -9,14 +9,67 @@ const inputDescriptions = [
   { name: 'dx', min: 0, max: 10, step: 1, initial: 4 }
 ]
 
+const makeHalfArch = (
+  direction,
+  { span, height, distributedForce, hForce, dx }
+) => {
+  const outputs = []
+
+  const lines = []
+  for (let i = 0; i <= dx; i++) {
+    // const vline = new Flatten.Line(
+    //   new Flatten.Point((span / 2) / dx * i * direction, 0),
+    //   new Flatten.Point((span / 2) / dx * i * direction, 1)
+    // )
+    const vline = new Flatten.Line(
+      new Flatten.Point((span / 2) / dx * i * direction, 0),
+      new Flatten.Point((span / 2) / dx * i * direction, 1)
+    )
+    vline.attrs = { stroke: 'green' }
+    lines.push(vline)
+  }
+  outputs.push(...lines)
+
+  const arch1Inverse = y => Math.acosh(-y + 1 + height)
+  const arch1Inverse0 = arch1Inverse(0)
+  const arch1Function = x => (-Math.cosh(x * arch1Inverse0 / span * 2) + 1 + height)
+  const f = new Extra.Formula(arch1Function, 0, 10 * direction, 0.01 * direction)
+  outputs.push(f)
+
+  const points = []
+  for (let i = 0; i <= dx; i++) {
+    const x = ((span / 2) / dx) * direction * i
+    const Pdx = new Flatten.Point(x, arch1Function(x))
+
+    Pdx.attrs = { r: 5, fill: 'green' }
+    points.push(Pdx)
+    outputs.push(new Extra.Text(Pdx, `P<tspan dy ="0.1">${i * direction}</tspan>`))
+  }
+  outputs.push(...points)
+
+  // const vectors = []
+  // let cumulativeForce = 0
+  // for (let i = 1; i < points.length; i++) {
+  //   const d = points[i].distanceTo(points[i - 1])
+  //   cumulativeForce += d * distributedForce
+  //   const v = new Flatten.Vector(hForce * direction, -cumulativeForce)
+  //
+  //   vectors.push(v)
+  // }
+  // console.log(vectors)
+
+  return outputs
+}
+
 const update = () => {
-  const {
-    span,
-    height,
-    distributedForce,
-    hForce,
-    dx
-  } = readInputs(inputDescriptions)
+  const inputValues = readInputs(inputDescriptions)
+  // const {
+  //   span,
+  //   height,
+  //   distributedForce,
+  //   hForce,
+  //   dx
+  // } = inputValues
   const outputs = []
 
   const center = new Flatten.Point(0, 0)
@@ -33,14 +86,9 @@ const update = () => {
 
   outputs.push(xAxis, yAxis)
 
-  for (let i = -dx; i <= dx; i++) {
-    const vline = new Flatten.Line(
-      new Flatten.Point((span/2)/dx*i, 0),
-      new Flatten.Point((span/2)/dx*i, 1)
-    )
-    vline.attrs = { stroke: 'green' }
-    outputs.push(vline)
-  }
+  outputs.push(...makeHalfArch(-1, inputValues))
+  outputs.push(...makeHalfArch(1, inputValues))
+
   // const textA = new Extra.Text(A, 'A')
   // outputs.push(A, textA)
 
@@ -48,42 +96,15 @@ const update = () => {
   // const f = new Extra.Formula(archFunction, -10, 10, 1)
   // outputs.push(f)
 
-  const arch1Inverse = y => Math.acosh(-y + 1 + height)
-  const arch1Inverse0 = arch1Inverse(0)
-  const arch1Function = x => (-Math.cosh(x * arch1Inverse0 / span*2) + 1 + height)
-  const f = new Extra.Formula(arch1Function, -10, 10, 0.01)
-  outputs.push(f)
-
-  const points = []
-  for (let i = -dx; i <= dx; i++) {
-    const x = (span / 2) / dx * i
-    const Pdx = new Flatten.Point(x, arch1Function(x))
-
-    Pdx.attrs = { r: 5, fill: 'green' }
-    points.push(Pdx)
-    outputs.push(new Extra.Text(Pdx, `P<tspan dy ="0.1">${i}</tspan>`))
-  }
-  outputs.push(...points)
-
-  // const vectors = []
-  // let cumulativeForce = 0
-  // for (let i = 1; i < points.length; i++) {
-  //   const d = points[i].distanceTo(points[i - 1])
-  //   const v = new Flatten.Vector(hForce, d * distributedForce)
-  //
-  //   vectors.push(v)
-  // }
-  // console.log(vectors)
-
-  // const P = f.intersect(xAxis)[0]
-
-  const P = new Flatten.Point(span/2, 0)
-  const textP = new Extra.Text(P, 'P')
-  outputs.push(P, textP)
-
   // const arch2Function = x => (-1 * Math.cosh(.x * x) + 1 + height)
   // const g = new Extra.Formula(arch2Function, -5, 5, 0.01)
   // outputs.push(P)
+
+  // const P = f.intersect(xAxis)[0]
+
+  // const P = new Flatten.Point(span/2, 0)
+  // const textP = new Extra.Text(P, 'P')
+  // outputs.push(P, textP)
 
   // const segment1 = new Flatten.Segment(A, new Flatten.Point(3, 4))
   // const segment2 = new Flatten.Segment(new Flatten.Point(1, 1), new Flatten.Point(4, 7))
