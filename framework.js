@@ -5,7 +5,7 @@ const scaleAttrs = (attrs = {}) => {
     ...attrs,
     r: (('r' in attrs) ? attrs.r : 3) / scale,
     strokeWidth: (('strokeWidth' in attrs) ? attrs.strokeWidth : 3) / scale,
-    fontSize: (('fontSize' in attrs) ? attrs.fontSize : 30) / scale
+    fontSize: (('fontSize' in attrs) ? attrs.fontSize : 20) / scale
   }
 }
 
@@ -86,8 +86,8 @@ class Text {
     let class_str = (className && className.length > 0) ? `class="${className}"` : ""
     return `
       <text
-        x="${this.point.x}"
-        y="${this.point.y}"
+        x="${this.point.x + 0.05}"
+        y="${this.point.y - 0.1}"
         stroke="${stroke || "black"}"
         stroke-width="${strokeWidth / 3}"
         font-size="${fontSize}px"

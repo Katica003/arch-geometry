@@ -5,6 +5,7 @@ const inputDescriptions = [
   { name: 'span', min: 0, max: 6, step: 0.1, initial: 4.2 },
   { name: 'height', min: 0, max: 6, step: 0.1, initial: 2.5 },
   { name: 'distributedForce', min: 0, max: 10, step: 0.1, initial: 2 },
+  { name: 'hForce', min: 0, max: 10, step: 0.1, initial: 2 },
   { name: 'dx', min: 0, max: 10, step: 1, initial: 4 }
 ]
 
@@ -13,6 +14,7 @@ const update = () => {
     span,
     height,
     distributedForce,
+    hForce,
     dx
   } = readInputs(inputDescriptions)
   const outputs = []
@@ -51,6 +53,27 @@ const update = () => {
   const arch1Function = x => (-Math.cosh(x * arch1Inverse0 / span*2) + 1 + height)
   const f = new Extra.Formula(arch1Function, -10, 10, 0.01)
   outputs.push(f)
+
+  const points = []
+  for (let i = -dx; i <= dx; i++) {
+    const x = (span / 2) / dx * i
+    const Pdx = new Flatten.Point(x, arch1Function(x))
+
+    Pdx.attrs = { r: 5, fill: 'green' }
+    points.push(Pdx)
+    outputs.push(new Extra.Text(Pdx, `P<tspan dy ="0.1">${i}</tspan>`))
+  }
+  outputs.push(...points)
+
+  // const vectors = []
+  // let cumulativeForce = 0
+  // for (let i = 1; i < points.length; i++) {
+  //   const d = points[i].distanceTo(points[i - 1])
+  //   const v = new Flatten.Vector(hForce, d * distributedForce)
+  //
+  //   vectors.push(v)
+  // }
+  // console.log(vectors)
 
   // const P = f.intersect(xAxis)[0]
 
