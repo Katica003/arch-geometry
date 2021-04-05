@@ -4,29 +4,36 @@ const Extra = window["@isti/flatten-js-extra"]
 const inputDescriptions = [
   { name: 'span', min: 0, max: 6, step: 0.1, initial: 4.2 },
   { name: 'height', min: 0, max: 6, step: 0.1, initial: 2.5 },
-  { name: 'distributedForce', min: 0, max: 10, step: 0.1, initial: 2 },
-  { name: 'hForce', min: 0, max: 10, step: 0.1, initial: 2 },
-  { name: 'dx', min: 0, max: 10, step: 1, initial: 4 }
+  { name: 'dx', min: 0, max: 10, step: 1, initial: 4 },
+
+  { name: 'distributedForceL', min: 0, max: 10, step: 0.1, initial: 2 },
+  { name: 'snowDistributedForceL', min: 0, max: 10, step: 0.1, initial: 0 },
+  { name: 'hForceL', min: 0, max: 10, step: 0.1, initial: 2 },
+
+  { name: 'distributedForceR', min: 0, max: 10, step: 0.1, initial: 2 },
+  { name: 'snowDistributedForceR', min: 0, max: 10, step: 0.1, initial: 0 },
+  { name: 'hForceR', min: 0, max: 10, step: 0.1, initial: 2 },
+
 ]
 
 const makeHalfArch = (
   direction,
-  { span, height, distributedForce, hForce, dx }
+  { span, height, distributedForce, snowDistributedForce, hForce, dx }
 ) => {
   const outputs = []
 
   const lineSep = (span / 2) / dx
 
-  const lines = []
+  const vlines = []
   for (let i = 0; i <= dx; i++) {
     const vline = new Flatten.Line(
       new Flatten.Point(lineSep * i * direction, 0),
       new Flatten.Point(lineSep * i * direction, 1)
     )
     vline.attrs = { stroke: 'green' }
-    lines.push(vline)
+    vlines.push(vline)
   }
-  outputs.push(...lines)
+  outputs.push(...vlines)
 
   const midlines = []
   for (let i = 1; i <= dx + 1; i++) {
@@ -60,7 +67,7 @@ const makeHalfArch = (
   let cumulativeForce = 0
   for (let i = 1; i < points.length; i++) {
     const d = points[i].distanceTo(points[i - 1])[0]
-    cumulativeForce += d * distributedForce
+    cumulativeForce += d * distributedForce + lineSep * snowDistributedForce
     const v = new Flatten.Vector(hForce * direction, -cumulativeForce)
 
     vectors.push(v)
@@ -73,21 +80,24 @@ const makeHalfArch = (
     const nextPoint = line.intersect(midlines[i])[0]
     newPoints.push(nextPoint)
     outputs.push(new Flatten.Segment(prevPoint, nextPoint))
-  }
+    }
   outputs.push(...newPoints)
+
+
 
   return outputs
 }
 
 const update = () => {
   const inputValues = readInputs(inputDescriptions)
-  // const {
-  //   span,
-  //   height,
-  //   distributedForce,
-  //   hForce,
-  //   dx
-  // } = inputValues
+  const {
+    span,
+    height,
+    distributedForceL, distributedForceR,
+    snowDistributedForceL, snowDistributedForceR,
+    hForceL, hForceR,
+    dx
+  } = inputValues
   const outputs = []
 
   const center = new Flatten.Point(0, 0)
@@ -104,8 +114,18 @@ const update = () => {
 
   outputs.push(xAxis, yAxis)
 
-  outputs.push(...makeHalfArch(-1, inputValues))
-  outputs.push(...makeHalfArch(1, { ...inputValues, hForce: inputValues.hForce + 1 }))
+  outputs.push(...makeHalfArch(-1, {
+    span, height, dx,
+    distributedForce: distributedForceL,
+    snowDistributedForce: snowDistributedForceL,
+    hForce: hForceL,
+  }))
+  outputs.push(...makeHalfArch(1, {
+    span, height, dx,
+    distributedForce: distributedForceR,
+    snowDistributedForce: snowDistributedForceR,
+    hForce: hForceR,
+  }))
 
   return outputs
 }
