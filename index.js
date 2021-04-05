@@ -79,13 +79,10 @@ const makeHalfArch = (
     const line = new Flatten.Line(prevPoint, vectors[i].rotate90CW())
     const nextPoint = line.intersect(midlines[i])[0]
     newPoints.push(nextPoint)
-    outputs.push(new Flatten.Segment(prevPoint, nextPoint))
     }
   outputs.push(...newPoints)
 
-
-
-  return outputs
+  return [outputs, newPoints]
 }
 
 const update = () => {
@@ -114,18 +111,28 @@ const update = () => {
 
   outputs.push(xAxis, yAxis)
 
-  outputs.push(...makeHalfArch(-1, {
+  const [leftOutputs, leftPoints] = makeHalfArch(-1, {
     span, height, dx,
     distributedForce: distributedForceL,
     snowDistributedForce: snowDistributedForceL,
     hForce: hForceL,
-  }))
-  outputs.push(...makeHalfArch(1, {
+  })
+
+  const [rightOutputs, rightPoints] = makeHalfArch(1, {
     span, height, dx,
     distributedForce: distributedForceR,
     snowDistributedForce: snowDistributedForceR,
     hForce: hForceR,
-  }))
+  })
+
+  outputs.push(...leftOutputs, ...rightOutputs)
+
+  const allPoints = [...leftPoints.reverse(), ...rightPoints]
+  let previousPoint = allPoints[0]
+  for (let i = 1; i < allPoints.length; i++) {
+    outputs.push(new Flatten.Segment(previousPoint, allPoints[i]))
+    previousPoint = allPoints[i]
+  }
 
   return outputs
 }
