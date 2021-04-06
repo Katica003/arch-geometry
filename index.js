@@ -5,19 +5,20 @@ const inputDescriptions = [
   { name: 'dx', min: 0, max: 10, step: 1, initial: 4 },
   { name: 'span', min: 0, max: 6, step: 0.1, initial: 4.2 },
   { name: 'height', min: 0, max: 6, step: 0.1, initial: 2.5 },
+  { name: 'thickness', min: 0, max: 0.2, step: 0.01, initial: 0.06 },
   { name: 'distributedForce', min: 0, max: 10, step: 0.1, initial: 2 },
 
-  { name: 'snowDistributedForceL', min: 0, max: 10, step: 0.1, initial: 1 },
-  { name: 'hForceL', min: 0, max: 10, step: 0.1, initial: 1 },
+  { name: 'snowDistributedForceL', min: 0, max: 10, step: 0.1, initial: 0 },
+  { name: 'hForceL', min: 0, max: 10, step: 0.1, initial: 2.3 },
 
-  { name: 'snowDistributedForceR', min: 0, max: 10, step: 0.1, initial: 2 },
-  { name: 'hForceR', min: 0, max: 10, step: 0.1, initial: 1 },
+  { name: 'snowDistributedForceR', min: 0, max: 10, step: 0.1, initial: 0 },
+  { name: 'hForceR', min: 0, max: 10, step: 0.1, initial: 2.3 },
 
 ]
 
 const makeHalfArch = (
   direction,
-  { span, height, distributedForce, snowDistributedForce, hForce, dx }
+  { span, height, distributedForce, snowDistributedForce, hForce, dx, thickness }
 ) => {
   const outputs = []
 
@@ -29,7 +30,7 @@ const makeHalfArch = (
       new Flatten.Point(lineSep * i * direction, 0),
       new Flatten.Point(lineSep * i * direction, 1)
     )
-    vline.attrs = { stroke: 'green' }
+    vline.attrs = { stroke: 'green', strokeWidth: 1 }
     vlines.push(vline)
   }
   outputs.push(...vlines)
@@ -40,7 +41,7 @@ const makeHalfArch = (
       new Flatten.Point(((-0.5 * lineSep) + lineSep * i) * direction, 0),
       new Flatten.Point(((-0.5 * lineSep) + lineSep * i) * direction, 1)
     )
-    vline.attrs = { stroke: 'green', strokeDashArray: '0.1' }
+    vline.attrs = { stroke: 'green', strokeWidth: 1, strokeDashArray: '0.1' }
     midlines.push(vline)
   }
   outputs.push(...midlines)
@@ -56,7 +57,7 @@ const makeHalfArch = (
     const x = lineSep * direction * i
     const Pdx = new Flatten.Point(x, arch1Function(x))
 
-    Pdx.attrs = { r: 5, fill: 'green' }
+    Pdx.attrs = { r: 2, fill: 'black' }
     points.push(Pdx)
     // outputs.push(new Extra.Text(Pdx, `P<tspan dy ="0.1">${i * direction}</tspan>`))
   }
@@ -77,9 +78,10 @@ const makeHalfArch = (
     const prevPoint = newPoints.slice(-1)[0]
     const line = new Flatten.Line(prevPoint, vectors[i].rotate90CW())
     const nextPoint = line.intersect(midlines[i])[0]
+    nextPoint.attrs = {r: 2, stroke: 'red'}
     newPoints.push(nextPoint)
   }
-  outputs.push(...newPoints)
+  // outputs.push(...newPoints)
 
   return [outputs, newPoints]
 }
@@ -129,7 +131,6 @@ const update = () => {
   const originalSegments = []
   for (let i = 1; i < allPoints.length; i++) {
     originalSegments.push(new Flatten.Segment(previousPoint, allPoints[i]))
-    // outputs.push(new Flatten.Segment(previousPoint, allPoints[i]))
     previousPoint = allPoints[i]
   }
 
@@ -146,7 +147,6 @@ const update = () => {
     for (let i = 0; i < allPoints.length; i++) {
       const correctedPoint = new Flatten.Point(allPoints[i].x * (span / newSpan), allPoints[i].y);
       correctedPoints.push(correctedPoint)
-      // outputs.push(new Flatten.Point(allPoints[i].x * (span / newSpan), allPoints[i].y))
     }
 
     let previousCorrectedPoint = correctedPoints[0]
@@ -167,18 +167,25 @@ const update = () => {
 
     for (let j = 0; j < correctedPoints.length; j++) {
       const finalPoint = new Flatten.Point(correctedPoints[j].x + shiftDistance[0], correctedPoints[j].y);
+      finalPoint.attrs = { stroke: 'blue', strokeDashArray: '0.1' }
       finalPoints.push(finalPoint)
       outputs.push(finalPoint)
     }
   } else{
     for (let i = 0; i < originalSegments.length; i++) {
+      originalSegments[i].attrs = {stroke: 'red'}
       outputs.push(originalSegments[i])
+    }
+    for (let i = 0; i < allPoints.length; i++) {
+      outputs.push(allPoints[i])
     }
   }
 
   let previousFinalPoint = finalPoints[0]
   for (let i = 1; i < finalPoints.length; i++) {
-    outputs.push(new Flatten.Segment(previousFinalPoint, finalPoints[i]))
+    const finalSegment = new Flatten.Segment(previousFinalPoint, finalPoints[i])
+    finalSegment.attrs = {stroke: 'blue'}
+    outputs.push(finalSegment)
     previousFinalPoint = finalPoints[i]
   }
 
