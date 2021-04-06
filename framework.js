@@ -13,12 +13,11 @@ const render = update => {
   const output = document.getElementById('output')
   const w = output.clientWidth / scale
   const h = output.clientHeight / scale
-  output.setAttribute('viewBox', `${-w/2} ${-h/2} ${w} ${h}`)
+  output.setAttribute('viewBox', `${-w / 2} ${-h / 2} ${w} ${h}`)
   output.innerHTML = update().map(g => {
-
     if (g instanceof window['@flatten-js/core'].Line) {
       return g.svg(
-        new window['@flatten-js/core'].Box(-w/2, -h/2, w/2, h/2),
+        new window['@flatten-js/core'].Box(-w / 2, -h / 2, w / 2, h / 2),
         scaleAttrs(g.attrs)
       )
     } else {
@@ -27,10 +26,10 @@ const render = update => {
   }).join('')
 }
 
-const readInputs = inputs => {
+window.readInputs = inputs => {
   const inputValues = {}
 
-  inputDescriptions.forEach(id => {
+  inputs.forEach(id => {
     const input = document.getElementById(`input-${id.name}`)
     inputValues[id.name] = Number(input.value)
   })
@@ -41,7 +40,7 @@ const readInputs = inputs => {
 const makeInputs = (inputs, update) => {
   const inputContainer = document.getElementById('inputs')
 
-  inputDescriptions.forEach(id => {
+  inputs.forEach(id => {
     const div = document.createElement('div')
 
     const input = document.createElement('input')
@@ -73,33 +72,32 @@ window.framework = {
   }
 }
 
-
 class Text {
-  constructor(point, text) {
+  constructor (point, text) {
     this.point = point
     this.text = text
   }
 
-  svg(attrs = {}) {
-    let {stroke, strokeWidth, fontSize, fill, id, className} = attrs
-    let id_str = (id && id.length > 0) ? `id="${id}"` : ""
-    let class_str = (className && className.length > 0) ? `class="${className}"` : ""
+  svg (attrs = {}) {
+    const { stroke, strokeWidth, fontSize, fill, id, className } = attrs
+    const idStr = (id && id.length > 0) ? `id="${id}"` : ''
+    const classStr = (className && className.length > 0) ? `class="${className}"` : ''
     return `
       <text
         x="${this.point.x + 0.05}"
         y="${this.point.y - 0.1}"
-        stroke="${stroke || "black"}"
+        stroke="${stroke || 'black'}"
         stroke-width="${strokeWidth / 3}"
         font-size="${fontSize}px"
-        fill="${fill || "blue"}"
-        ${id_str}
-        ${class_str}
+        fill="${fill || 'blue'}"
+        ${idStr}
+        ${classStr}
       >${this.text}</text>`
   }
 }
 
 class Formula {
-  constructor(f, from, to, step) {
+  constructor (f, from, to, step) {
     // this.attrs = {
     //   fill: 'none'
     // }
@@ -129,25 +127,25 @@ class Formula {
     return [].concat(...this.multiline.edges.map(e => e.shape.intersect(shape)))
   }
 
-  svg(attrs = {}) {
-    let {stroke, strokeWidth, fill, fillRule, fillOpacity, id, className} = attrs
-    let id_str = (id && id.length > 0) ? `id="${id}"` : ""
-    let class_str = (className && className.length > 0) ? `class="${className}"` : ""
+  svg (attrs = {}) {
+    const { stroke, strokeWidth, fill, fillRule, fillOpacity, id, className } = attrs
+    const idStr = (id && id.length > 0) ? `id="${id}"` : ''
+    const classStr = (className && className.length > 0) ? `class="${className}"` : ''
 
     let svgStr = `
       <path
-        stroke="${stroke || "black"}"
+        stroke="${stroke || 'black'}"
         stroke-width="${strokeWidth || 1}"
-        fill="${fill || "none"}"
-        fill-rule="${fillRule || "evenodd"}"
-        fill-opacity="${fillOpacity || 1.0}" ${id_str} ${class_str}
+        fill="${fill || 'none'}"
+        fill-rule="${fillRule || 'evenodd'}"
+        fill-opacity="${fillOpacity || 1.0}" ${idStr} ${classStr}
         d="
     `
     svgStr += `\nM${this.multiline.first.start.x},${this.multiline.first.start.y}`
-    for (let edge of this.multiline) {
+    for (const edge of this.multiline) {
       svgStr += edge.svg()
     }
-    svgStr += `" >\n</path>`
+    svgStr += '" >\n</path>'
 
     return svgStr
   }
@@ -155,7 +153,7 @@ class Formula {
 
 window['@isti/flatten-js-extra'] = {
   Text,
-  Formula,
+  Formula
 }
 
 // window['@flatten-js/core'].Point = class extends window['@flatten-js/core'].Point {
@@ -164,19 +162,19 @@ window['@isti/flatten-js-extra'] = {
 //   }
 // }
 
-window['@flatten-js/core'].Segment.prototype.svg = function(attrs = {}) {
-        let {stroke, strokeWidth, strokeDashArray, id, className} = attrs;
-        // let rest_str = Object.keys(rest).reduce( (acc, key) => acc += ` ${key}="${rest[key]}"`, "");
-        let id_str = (id && id.length > 0) ? `id="${id}"` : "";
-        let class_str = (className && className.length > 0) ? `class="${className}"` : "";
+window['@flatten-js/core'].Segment.prototype.svg = function (attrs = {}) {
+  const { stroke, strokeWidth, strokeDashArray, id, className } = attrs
+  // let restStr = Object.keys(rest).reduce( (acc, key) => acc += ` ${key}="${rest[key]}"`, "");
+  const idStr = (id && id.length > 0) ? `id="${id}"` : ''
+  const classStr = (className && className.length > 0) ? `class="${className}"` : ''
 
-        return `\n<line
+  return `\n<line
           x1="${this.start.x}"
           y1="${this.start.y}"
           x2="${this.end.x}"
           y2="${this.end.y}"
-          stroke="${stroke || "black"}"
+          stroke="${stroke || 'black'}"
           stroke-width="${strokeWidth || 1}"
           stroke-dasharray="${strokeDashArray || ''}"
-          ${id_str} ${class_str} />`;
+          ${idStr} ${classStr} />`
 }
