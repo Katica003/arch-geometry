@@ -2,17 +2,16 @@ const Flatten = window["@flatten-js/core"]
 const Extra = window["@isti/flatten-js-extra"]
 
 const inputDescriptions = [
+  { name: 'dx', min: 0, max: 10, step: 1, initial: 4 },
   { name: 'span', min: 0, max: 6, step: 0.1, initial: 4.2 },
   { name: 'height', min: 0, max: 6, step: 0.1, initial: 2.5 },
-  { name: 'dx', min: 0, max: 10, step: 1, initial: 4 },
+  { name: 'distributedForce', min: 0, max: 10, step: 0.1, initial: 2 },
 
-  { name: 'distributedForceL', min: 0, max: 10, step: 0.1, initial: 2 },
-  { name: 'snowDistributedForceL', min: 0, max: 10, step: 0.1, initial: 0 },
-  { name: 'hForceL', min: 0, max: 10, step: 0.1, initial: 2 },
+  { name: 'snowDistributedForceL', min: 0, max: 10, step: 0.1, initial: 1 },
+  { name: 'hForceL', min: 0, max: 10, step: 0.1, initial: 1 },
 
-  { name: 'distributedForceR', min: 0, max: 10, step: 0.1, initial: 2 },
-  { name: 'snowDistributedForceR', min: 0, max: 10, step: 0.1, initial: 0 },
-  { name: 'hForceR', min: 0, max: 10, step: 0.1, initial: 2 },
+  { name: 'snowDistributedForceR', min: 0, max: 10, step: 0.1, initial: 2 },
+  { name: 'hForceR', min: 0, max: 10, step: 0.1, initial: 1 },
 
 ]
 
@@ -79,7 +78,7 @@ const makeHalfArch = (
     const line = new Flatten.Line(prevPoint, vectors[i].rotate90CW())
     const nextPoint = line.intersect(midlines[i])[0]
     newPoints.push(nextPoint)
-    }
+  }
   outputs.push(...newPoints)
 
   return [outputs, newPoints]
@@ -90,7 +89,7 @@ const update = () => {
   const {
     span,
     height,
-    distributedForceL, distributedForceR,
+    distributedForce,
     snowDistributedForceL, snowDistributedForceR,
     hForceL, hForceR,
     dx
@@ -112,15 +111,13 @@ const update = () => {
   outputs.push(xAxis, yAxis)
 
   const [leftOutputs, leftPoints] = makeHalfArch(-1, {
-    span, height, dx,
-    distributedForce: distributedForceL,
+    span, height, dx, distributedForce,
     snowDistributedForce: snowDistributedForceL,
     hForce: hForceL,
   })
 
   const [rightOutputs, rightPoints] = makeHalfArch(1, {
-    span, height, dx,
-    distributedForce: distributedForceR,
+    span, height, dx, distributedForce,
     snowDistributedForce: snowDistributedForceR,
     hForce: hForceR,
   })
@@ -129,10 +126,62 @@ const update = () => {
 
   const allPoints = [...leftPoints.reverse(), ...rightPoints]
   let previousPoint = allPoints[0]
+  const originalSegments = []
   for (let i = 1; i < allPoints.length; i++) {
-    outputs.push(new Flatten.Segment(previousPoint, allPoints[i]))
+    originalSegments.push(new Flatten.Segment(previousPoint, allPoints[i]))
+    // outputs.push(new Flatten.Segment(previousPoint, allPoints[i]))
     previousPoint = allPoints[i]
   }
+
+  let newSpan = 0
+  for (let i = 0; i < originalSegments.length; i++) {
+    if (xAxis.intersect(originalSegments[i]).length != 0) {
+      newSpan = newSpan + xAxis.intersect(originalSegments[i])[0].distanceTo(center)[0]
+    }
+  }
+
+  const correctedPoints = []
+  const finalPoints = []
+  if (snowDistributedForceL != snowDistributedForceR) {
+    for (let i = 0; i < allPoints.length; i++) {
+      const correctedPoint = new Flatten.Point(allPoints[i].x * (span / newSpan), allPoints[i].y);
+      correctedPoints.push(correctedPoint)
+      // outputs.push(new Flatten.Point(allPoints[i].x * (span / newSpan), allPoints[i].y))
+    }
+
+    let previousCorrectedPoint = correctedPoints[0]
+    const correctedSegments = []
+    for (let i = 1; i < correctedPoints.length; i++) {
+      correctedSegments.push(new Flatten.Segment(previousCorrectedPoint, correctedPoints[i]))
+      previousCorrectedPoint = correctedPoints[i]
+    }
+
+    const shiftDistance = []
+    for (let i = 0; i < correctedSegments.length; i++) {
+      console.log(xAxis.intersect(correctedSegments[i]).length)
+      if (xAxis.intersect(correctedSegments[i]).length != 0) {
+        shiftDistance.push(xAxis.intersect(correctedSegments[i])[0].distanceTo(new Flatten.Point(-span / 2, 0))[0])
+      }
+    }
+
+
+    for (let j = 0; j < correctedPoints.length; j++) {
+      const finalPoint = new Flatten.Point(correctedPoints[j].x + shiftDistance[0], correctedPoints[j].y);
+      finalPoints.push(finalPoint)
+      outputs.push(finalPoint)
+    }
+  } else{
+    for (let i = 0; i < originalSegments.length; i++) {
+      outputs.push(originalSegments[i])
+    }
+  }
+
+  let previousFinalPoint = finalPoints[0]
+  for (let i = 1; i < finalPoints.length; i++) {
+    outputs.push(new Flatten.Segment(previousFinalPoint, finalPoints[i]))
+    previousFinalPoint = finalPoints[i]
+  }
+
 
   return outputs
 }
