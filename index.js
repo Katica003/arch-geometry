@@ -1,7 +1,7 @@
 const Flatten = window['@flatten-js/core']
 const Extra = window['@isti/flatten-js-extra']
 
-const inputDescriptions = [
+const inputs = [
   { name: 'dx', min: 0, max: 10, step: 1, initial: 4 },
   { name: 'span', min: 0, max: 6, step: 0.1, initial: 4.2 },
   { name: 'height', min: 0, max: 6, step: 0.1, initial: 2.5 },
@@ -30,7 +30,7 @@ const makeHalfArch = (
       new Flatten.Point(lineSep * i * direction, 0),
       new Flatten.Point(lineSep * i * direction, 1)
     )
-    vline.attrs = { stroke: 'green', strokeWidth: 1 }
+    vline.attrs = { stroke: 'green', strokeWidth: 0.01 }
     vlines.push(vline)
   }
   outputs.push(...vlines)
@@ -41,7 +41,7 @@ const makeHalfArch = (
       new Flatten.Point(((-0.5 * lineSep) + lineSep * i) * direction, 0),
       new Flatten.Point(((-0.5 * lineSep) + lineSep * i) * direction, 1)
     )
-    vline.attrs = { stroke: 'green', strokeWidth: 1, strokeDashArray: '0.1' }
+    vline.attrs = { stroke: 'green', strokeWidth: 0.01, strokeDashArray: '0.1' }
     midlines.push(vline)
   }
   outputs.push(...midlines)
@@ -58,7 +58,7 @@ const makeHalfArch = (
     const x = lineSep * direction * i
     const Pdx = new Flatten.Point(x, arch1Function(x))
 
-    Pdx.attrs = { r: 2, fill: 'black' }
+    Pdx.attrs = { r: 0.02, fill: 'black' }
     points.push(Pdx)
     // outputs.push(new Extra.Text(Pdx, `P<tspan dy ="0.1">${i * direction}</tspan>`))
   }
@@ -79,7 +79,7 @@ const makeHalfArch = (
     const prevPoint = newPoints.slice(-1)[0]
     const line = new Flatten.Line(prevPoint, vectors[i].rotate90CW())
     const nextPoint = line.intersect(midlines[i])[0]
-    nextPoint.attrs = { r: 2, stroke: 'red' }
+    nextPoint.attrs = { r: 0.02, stroke: 'red' }
     newPoints.push(nextPoint)
   }
   // outputs.push(...newPoints)
@@ -87,17 +87,15 @@ const makeHalfArch = (
   return [outputs, newPoints]
 }
 
-const update = () => {
-  const inputValues = window.readInputs(inputDescriptions)
-  const {
-    span,
-    height,
-    thickness,
-    distributedForce,
-    snowDistributedForceL, snowDistributedForceR,
-    hForceL, hForceR,
-    dx
-  } = inputValues
+const update = ({
+  span,
+  height,
+  thickness,
+  distributedForce,
+  snowDistributedForceL, snowDistributedForceR,
+  hForceL, hForceR,
+  dx
+}) => {
   const outputs = []
 
   const center = new Flatten.Point(0, 0)
@@ -202,5 +200,6 @@ const update = () => {
 }
 
 window.addEventListener('load', () => {
-  window.framework.init(inputDescriptions, update)
+  const output = document.getElementById('output')
+  const f = new window.Framework(inputs, update, output)
 })
